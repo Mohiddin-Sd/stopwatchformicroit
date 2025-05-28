@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Advanced Stopwatch</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 10px;
+    }
+
+    .stopwatch {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+      text-align: center;
+      backdrop-filter: blur(10px);
+    }
+
+    .time {
+      font-size: 4rem;
+      margin: 20px 0;
+    }
+
+    .controls {
+      margin: 20px 0;
+    }
+
+    .controls button {
+      padding: 10px 20px;
+      margin: 0 5px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      background-color: #00c6ff;
+      color: white;
+      transition: background 0.3s ease;
+    }
+
+    .controls button:hover {
+      background-color: #0072ff;
+    }
+
+    .laps {
+      margin-top: 20px;
+      max-height: 200px;
+      overflow-y: auto;
+      width: 100%;
+      text-align: left;
+    }
+
+    .laps li {
+      background: rgba(255, 255, 255, 0.2);
+      margin: 5px 0;
+      padding: 8px;
+      border-radius: 8px;
+    }
+
+    @media (max-width: 600px) {
+      .time {
+        font-size: 2.5rem;
+      }
+
+      .controls button {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="stopwatch">
+    <h1>Stopwatch</h1>
+    <div class="time" id="display">00:00:00.000</div>
+
+    <div class="controls">
+      <button onclick="startStop()">Start</button>
+      <button onclick="reset()">Reset</button>
+      <button onclick="recordLap()">Lap</button>
+    </div>
+
+    <ul class="laps" id="laps"></ul>
+  </div>
+
+  <script>
+    let startTime = 0;
+    let elapsedTime = 0;
+    let timerInterval;
+    let running = false;
+
+    const display = document.getElementById('display');
+    const laps = document.getElementById('laps');
+
+    function timeToString(time) {
+      let diffInHrs = time / 3600000;
+      let hh = Math.floor(diffInHrs);
+
+      let diffInMin = (diffInHrs - hh) * 60;
+      let mm = Math.floor(diffInMin);
+
+      let diffInSec = (diffInMin - mm) * 60;
+      let ss = Math.floor(diffInSec);
+
+      let diffInMs = (diffInSec - ss) * 1000;
+      let ms = Math.floor(diffInMs);
+
+      return (
+        (hh < 10 ? "0" + hh : hh) + ":" +
+        (mm < 10 ? "0" + mm : mm) + ":" +
+        (ss < 10 ? "0" + ss : ss) + "." +
+        (ms < 100 ? (ms < 10 ? "00" + ms : "0" + ms) : ms)
+      );
+    }
+
+    function print(txt) {
+      display.innerHTML = txt;
+    }
+
+    function startStop() {
+      if (!running) {
+        startTime = Date.now() - elapsedTime;
+        timerInterval = setInterval(function printTime() {
+          elapsedTime = Date.now() - startTime;
+          print(timeToString(elapsedTime));
+        }, 10);
+        document.querySelector('.controls button:first-child').textContent = 'Stop';
+        running = true;
+      } else {
+        clearInterval(timerInterval);
+        document.querySelector('.controls button:first-child').textContent = 'Start';
+        running = false;
+      }
+    }
+
+    function reset() {
+      clearInterval(timerInterval);
+      print("00:00:00.000");
+      elapsedTime = 0;
+      running = false;
+      document.querySelector('.controls button:first-child').textContent = 'Start';
+      laps.innerHTML = '';
+    }
+
+    function recordLap() {
+      if (!running) return;
+      const lapTime = timeToString(elapsedTime);
+      const lapItem = document.createElement('li');
+      lapItem.textContent = `Lap ${laps.children.length + 1}: ${lapTime}`;
+      laps.prepend(lapItem);
+    }
+  </script>
+
+</body>
+</html>
